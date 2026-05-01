@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# NovaCart Analytics Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A high-fidelity, futuristic, and responsive real-time analytics dashboard for **NovaCart**. This standalone application showcases a premium SaaS aesthetic using modern web technologies to present simulated, live-updating metrics in a visually stunning interface.
 
-Currently, two official plugins are available:
+## 🌟 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Futuristic UI/UX**: Designed with a sleek dark mode, glassmorphism effects, and neon accents (cyan and purple) for a highly immersive experience.
+- **Dynamic Data Visualization**: Integrated with Recharts to display interactive charts including revenue trends, sales distributions, and more.
+- **Simulated Live Metrics**: KPIs and charts mimic real-time data updates, creating a dynamic and "alive" feel.
+- **Responsive Layout**: Fully responsive design that adapts beautifully across desktop, tablet, and mobile devices.
+- **Modern Component Architecture**: Modular React components for easy maintenance and scalability (e.g., `TopNav`, `DashboardHeader`, `KPICards`, `MainCharts`, `SecondaryMetrics`, `ActivityFeed`).
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: [React 19](https://react.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) (with custom neon and glassmorphic utilities)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Charts**: [Recharts](https://recharts.org/)
+- **Utility**: `clsx` and `tailwind-merge` for robust class name management.
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Follow these steps to run the project locally.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js (v18 or higher recommended)
+- npm or yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. **Clone the repository** (if applicable) or navigate to the project directory:
+   ```bash
+   cd analytics-dashboard
+   ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+3. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+4. **View the application**:
+   Open your browser and navigate to the local URL provided by Vite (usually `http://localhost:5173`).
+
+## 🏗️ Project Structure
+
+- `src/components/dashboard/`: Contains the core dashboard components (charts, nav, KPIs, etc.).
+- `src/App.tsx`: The main application entry point, structuring the layout and background ambient effects.
+- `tailwind.config.js`: Custom Tailwind configurations including colors (`neon-cyan`, `neon-purple`), animations, and typography.
+- `package.json`: Project dependencies and scripts.
+
+## 📜 License
+
+Internal Dashboard. All rights reserved.
