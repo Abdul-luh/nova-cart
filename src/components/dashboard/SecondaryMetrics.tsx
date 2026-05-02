@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
-import { Globe, ArrowRight, TrendingUp } from "lucide-react";
+import { Globe, ArrowRight, TrendingUp, X, ShoppingCart, Box, DollarSign } from "lucide-react";
 
 const categoryData = [
   { name: 'Gaming Accounts', value: 45 },
@@ -20,24 +21,31 @@ const trafficSources = [
 ];
 
 const regionalSales = [
-  { country: 'United States', flag: '🇺🇸', users: '12.4k', trend: '+14%' },
-  { country: 'United Kingdom', flag: '🇬🇧', users: '8.2k', trend: '+5%' },
-  { country: 'Nigeria', flag: '🇳🇬', users: '6.1k', trend: '+22%' },
-  { country: 'UAE', flag: '🇦🇪', users: '4.8k', trend: '+18%' },
-  { country: 'South Africa', flag: '🇿🇦', users: '3.9k', trend: '+9%' },
+  { country: 'United States', flag: '🇺🇸', users: '12.4k', trend: '+14%', orders: '8,210', topProduct: 'Valorant Accounts', aov: '$55' },
+  { country: 'United Kingdom', flag: '🇬🇧', users: '8.2k', trend: '+5%', orders: '5,140', topProduct: 'FIFA Coins', aov: '$32' },
+  { country: 'Nigeria', flag: '🇳🇬', users: '6.1k', trend: '+22%', orders: '4,050', topProduct: 'AI Prompt Packs', aov: '$28' },
+  { country: 'UAE', flag: '🇦🇪', users: '4.8k', trend: '+18%', orders: '3,200', topProduct: 'Rare Skins', aov: '$110' },
+  { country: 'South Africa', flag: '🇿🇦', users: '3.9k', trend: '+9%', orders: '2,600', topProduct: 'Discord Nitro', aov: '$18' },
 ];
 
+interface PieTooltipEntry {
+  name: string;
+  value: number;
+}
+
+const CustomTooltip = ({ active, payload }: { active?: boolean, payload?: PieTooltipEntry[] }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#111827] border border-white/10 p-2 rounded-lg shadow-xl backdrop-blur-md">
+        <p className="text-gray-200 text-sm font-semibold">{`${payload[0].name}: ${payload[0].value}%`}</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 export function SecondaryMetrics() {
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#111827] border border-white/10 p-2 rounded-lg shadow-xl backdrop-blur-md">
-          <p className="text-gray-200 text-sm font-semibold">{`${payload[0].name}: ${payload[0].value}%`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  const [selectedRegion, setSelectedRegion] = useState<typeof regionalSales[0] | null>(null);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
@@ -99,7 +107,7 @@ export function SecondaryMetrics() {
       </div>
 
       {/* Regional Sales */}
-      <div className="glass-panel p-6 xl:col-span-1 md:col-span-2">
+      <div className="glass-panel p-6 xl:col-span-1 md:col-span-2 relative overflow-hidden">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h3 className="text-lg font-bold text-white">Live Regional Activity</h3>
@@ -110,9 +118,13 @@ export function SecondaryMetrics() {
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 relative z-10">
           {regionalSales.map((region, idx) => (
-            <div key={idx} className="flex items-center justify-between group cursor-pointer hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
+            <div 
+              key={idx} 
+              onClick={() => setSelectedRegion(region)}
+              className="flex items-center justify-between group cursor-pointer hover:bg-white/10 p-2 -mx-2 rounded-lg transition-all"
+            >
               <div className="flex items-center gap-3">
                 <span className="text-xl">{region.flag}</span>
                 <span className="text-gray-300 font-medium group-hover:text-white transition-colors">{region.country}</span>
@@ -132,6 +144,56 @@ export function SecondaryMetrics() {
           View Full Map
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
+
+        {/* Region Detail Modal Overlay */}
+        {selectedRegion && (
+          <div className="absolute inset-0 z-20 bg-[#111827]/95 backdrop-blur-md p-6 flex flex-col animate-in slide-in-from-bottom-4 fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{selectedRegion.flag}</span>
+                <h3 className="text-xl font-bold text-white">{selectedRegion.country}</h3>
+              </div>
+              <button 
+                onClick={() => setSelectedRegion(null)}
+                className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 flex flex-col gap-4">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-neon-cyan/10 text-neon-cyan flex items-center justify-center">
+                  <ShoppingCart className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Total Orders</p>
+                  <p className="text-xl font-bold text-white">{selectedRegion.orders}</p>
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-neon-purple/10 text-neon-purple flex items-center justify-center">
+                  <Box className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Top Product</p>
+                  <p className="text-lg font-bold text-white">{selectedRegion.topProduct}</p>
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg bg-neon-lime/10 text-neon-lime flex items-center justify-center">
+                  <DollarSign className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-400">Avg Order Value</p>
+                  <p className="text-xl font-bold text-white">{selectedRegion.aov}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

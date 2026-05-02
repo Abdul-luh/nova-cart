@@ -1,33 +1,30 @@
-import { TopNav } from "./components/dashboard/TopNav";
-import { DashboardHeader } from "./components/dashboard/DashboardHeader";
-import { KPICards } from "./components/dashboard/KPICards";
-import { MainCharts } from "./components/dashboard/MainCharts";
-import { SecondaryMetrics } from "./components/dashboard/SecondaryMetrics";
-import { ActivityFeed } from "./components/dashboard/ActivityFeed";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { DashboardLayout } from "./layouts/DashboardLayout";
+import { Dashboard } from "./pages/Dashboard";
+import { Orders } from "./pages/Orders";
+import { Listings } from "./pages/Listings";
+import { Users } from "./pages/Users";
+import { FraudCenter } from "./pages/FraudCenter";
+import { Payments } from "./pages/Payments";
+import { Reports } from "./pages/Reports";
+import { Settings } from "./pages/Settings";
 
 function App() {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden selection:bg-neon-cyan/30">
-      {/* Background Ambient Effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-neon-purple/20 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-neon-cyan/10 blur-[120px] pointer-events-none"></div>
-      
-      <div className="max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8 relative z-10">
-        <TopNav />
-        
-        <main className="animate-in fade-in duration-700">
-          <DashboardHeader />
-          <KPICards />
-          <MainCharts />
-          <SecondaryMetrics />
-          <ActivityFeed />
-        </main>
-        
-        <footer className="mt-12 pt-6 border-t border-white/10 text-center text-sm text-gray-500 pb-6">
-          &copy; {new Date().getFullYear()} NovaCart Live Analytics. Internal Dashboard.
-        </footer>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<DashboardLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="listings" element={<Listings />} />
+          <Route path="users" element={<Users />} />
+          <Route path="fraud" element={<FraudCenter />} />
+          <Route path="payments" element={<Payments />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

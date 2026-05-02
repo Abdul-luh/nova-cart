@@ -15,7 +15,7 @@ const generateUserConvData = () => [
   { name: 'Sun', users: 3490, conv: 4.3 },
 ];
 
-const generateRevData = () => [
+const baseRevData = [
   { name: '00:00', revenue: 4000, refunds: 240 },
   { name: '04:00', revenue: 3000, refunds: 139 },
   { name: '08:00', revenue: 2000, refunds: 980 },
@@ -25,32 +25,65 @@ const generateRevData = () => [
   { name: '24:00', revenue: 3490, refunds: 430 },
 ];
 
+interface TooltipEntry {
+  name: string;
+  value: number;
+  color: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: { active?: boolean, payload?: TooltipEntry[], label?: string }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-[#111827] border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
+        <p className="text-gray-300 mb-2 font-medium">{label}</p>
+        {payload.map((entry: TooltipEntry, index: number) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm font-semibold">
+            {entry.name}: {entry.name === 'Conversion Rate' ? `${entry.value}%` : entry.name === 'Revenue' || entry.name === 'Refunds' ? `$${entry.value.toLocaleString()}` : entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+const getScaledRevData = (range: string) => {
+  let multiplier = 1;
+  let labels = baseRevData.map(d => d.name);
+
+  if (range === '7D') {
+    multiplier = 6;
+    labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  } else if (range === '30D') {
+    multiplier = 25;
+    labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7'];
+  } else if (range === '1Y') {
+    multiplier = 300;
+    labels = ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov', 'Dec'];
+  }
+
+  return baseRevData.map((d, i) => ({
+    name: labels[i],
+    revenue: d.revenue * multiplier,
+    refunds: d.refunds * multiplier
+  }));
+};
+
 export function MainCharts() {
   const [userConvData, setUserConvData] = useState(generateUserConvData());
-  const [revData, setRevData] = useState(generateRevData());
+  const [dateRange, setDateRange] = useState('Today');
+  const revData = getScaledRevData(dateRange);
 
-  // Simulate real-time updates for charts
+  // Simulate real-time updates for user/conversion chart
   useEffect(() => {
     const interval = setInterval(() => {
       setUserConvData(current => {
         const newData = [...current];
         const lastIdx = newData.length - 1;
-        // Jiggle the last day's data slightly
         newData[lastIdx] = {
           ...newData[lastIdx],
           users: newData[lastIdx].users + Math.floor((Math.random() - 0.5) * 100),
           conv: Number((newData[lastIdx].conv + (Math.random() - 0.5) * 0.2).toFixed(1))
-        };
-        return newData;
-      });
-
-      setRevData(current => {
-        const newData = [...current];
-        const lastIdx = newData.length - 1;
-        newData[lastIdx] = {
-          ...newData[lastIdx],
-          revenue: newData[lastIdx].revenue + Math.floor(Math.random() * 200),
-          refunds: newData[lastIdx].refunds + (Math.random() > 0.8 ? Math.floor(Math.random() * 20) : 0)
         };
         return newData;
       });
@@ -59,29 +92,13 @@ export function MainCharts() {
     return () => clearInterval(interval);
   }, []);
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#111827] border border-white/10 p-3 rounded-lg shadow-xl backdrop-blur-md">
-          <p className="text-gray-300 mb-2 font-medium">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm font-semibold">
-              {entry.name}: {entry.name === 'Conversion Rate' ? `${entry.value}%` : entry.name === 'Revenue' || entry.name === 'Refunds' ? `$${entry.value}` : entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       {/* Users vs Conversion Rate Chart */}
-      <div className="glass-panel p-6 lg:col-span-2 relative">
+      <div className="glass-panel p-6 lg:col-span-2 relative flex flex-col">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="text-lg font-bold text-white">Users Last 7 Days vs Conversion Rate</h3>
+            <h3 className="text-lg font-bold text-white">Users vs Conversion Rate</h3>
             <p className="text-sm text-gray-400">Traffic vs Successful Checkouts</p>
           </div>
           <div className="flex gap-2 text-gray-400">
@@ -113,21 +130,36 @@ export function MainCharts() {
       </div>
 
       {/* Revenue vs Refunds Chart */}
-      <div className="glass-panel p-6 relative">
-        <div className="flex justify-between items-center mb-6">
+      <div className="glass-panel p-6 relative flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4">
           <div>
             <h3 className="text-lg font-bold text-white">Revenue vs Refunds</h3>
-            <p className="text-sm text-gray-400">Today's financial flow</p>
+            <p className="text-sm text-gray-400">Financial flow summary</p>
           </div>
-          <button className="p-1.5 text-gray-400 hover:bg-white/10 rounded-md transition-colors"><MoreHorizontal className="w-4 h-4" /></button>
+          
+          <div className="flex bg-white/5 rounded-lg p-1">
+            {['Today', '7D', '30D', '1Y'].map(range => (
+              <button
+                key={range}
+                onClick={() => setDateRange(range)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                  dateRange === range
+                    ? 'bg-neon-cyan/20 text-neon-cyan shadow-[0_0_10px_rgba(0,242,254,0.2)]'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="h-[300px] w-full">
+        <div className="h-[300px] w-full flex-1">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={revData} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
+              <YAxis stroke="rgba(255,255,255,0.3)" tick={{ fill: '#9ca3af', fontSize: 12 }} tickFormatter={(val: number) => `$${val/1000}k`} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }} />
               <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
               <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#84cc16" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#84cc16', strokeWidth: 0 }} />
