@@ -1,4 +1,31 @@
+import { useState } from "react";
+
+const allListings = [
+  { title: "Premium Midjourney Prompts", seller: "ai_master", price: "$15.00", views: "1.2k", conv: "4.5%", status: "Active", category: "AI Tools" },
+  { title: "Valorant Radiant Account", seller: "game_king", price: "$450.00", views: "856", conv: "1.2%", status: "Featured", category: "Gaming Accounts" },
+  { title: "Shopify Dropship Template", seller: "ecom_pro", price: "$89.99", views: "2.4k", conv: "8.1%", status: "Active", category: "Automation" },
+  { title: "Discord Nitro 1 Year (Gift)", seller: "nitro_plug", price: "$65.00", views: "4.1k", conv: "12.4%", status: "Out of Stock", category: "Gaming Accounts" },
+  { title: "CS2 Dragon Lore Skin", seller: "skin_vault", price: "$2,100.00", views: "620", conv: "0.8%", status: "Active", category: "Rare Skins" },
+  { title: "GPT-4 Business Prompts", seller: "ai_master", price: "$29.99", views: "3.8k", conv: "9.3%", status: "Featured", category: "AI Tools" },
+  { title: "Fiverr Account (Level 2)", seller: "social_hub", price: "$199.00", views: "900", conv: "2.1%", status: "Active", category: "Social Media Assets" },
+  { title: "Windows 11 Pro License", seller: "key_depot", price: "$12.99", views: "11k", conv: "22%", status: "Active", category: "Software Licenses" },
+];
+
 export function Listings() {
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+
+  const filtered = allListings.filter((item) => {
+    const q = query.toLowerCase();
+    const matchesQuery =
+      !q ||
+      item.title.toLowerCase().includes(q) ||
+      item.seller.toLowerCase().includes(q);
+    const matchesCategory =
+      categoryFilter === "All Categories" || item.category === categoryFilter;
+    return matchesQuery && matchesCategory;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
@@ -15,56 +42,71 @@ export function Listings() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-4">
           <div className="flex gap-4 mb-2">
-             <div className="relative w-full sm:w-64">
+            <div className="relative w-full sm:w-64">
               <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input type="text" placeholder="Search listings..." className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-cyan/50 transition-all placeholder:text-gray-500" />
+              <input
+                id="listings-search"
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search listings..."
+                className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-cyan/50 transition-all placeholder:text-gray-500"
+              />
             </div>
-            <select className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50">
+            <select
+              id="listings-category-filter"
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50"
+            >
               <option>All Categories</option>
               <option>Gaming Accounts</option>
               <option>Rare Skins</option>
               <option>AI Tools</option>
               <option>Automation</option>
+              <option>Software Licenses</option>
+              <option>Social Media Assets</option>
             </select>
           </div>
 
           <div className="grid gap-4">
-            {[
-              { title: "Premium Midjourney Prompts", seller: "ai_master", price: "$15.00", views: "1.2k", conv: "4.5%", status: "Active" },
-              { title: "Valorant Radiant Account", seller: "game_king", price: "$450.00", views: "856", conv: "1.2%", status: "Featured" },
-              { title: "Shopify Dropship Template", seller: "ecom_pro", price: "$89.99", views: "2.4k", conv: "8.1%", status: "Active" },
-              { title: "Discord Nitro 1 Year (Gift)", seller: "nitro_plug", price: "$65.00", views: "4.1k", conv: "12.4%", status: "Out of Stock" },
-            ].map((listing, i) => (
-              <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-black/20 border border-white/5 hover:border-white/10 transition-colors gap-4">
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-200">{listing.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">by <span className="text-neon-cyan">{listing.seller}</span></p>
-                </div>
-                <div className="flex items-center gap-6 text-sm">
-                  <div className="text-right">
-                    <p className="text-gray-400 text-xs">Price</p>
-                    <p className="font-medium text-white">{listing.price}</p>
+            {filtered.length > 0 ? (
+              filtered.map((listing, i) => (
+                <div key={i} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-black/20 border border-white/5 hover:border-white/10 transition-colors gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-200">{listing.title}</h3>
+                    <p className="text-xs text-gray-500 mt-1">by <span className="text-neon-cyan">{listing.seller}</span></p>
                   </div>
-                  <div className="text-right hidden sm:block">
-                    <p className="text-gray-400 text-xs">Views</p>
-                    <p className="text-gray-300">{listing.views}</p>
-                  </div>
-                  <div className="text-right hidden sm:block">
-                    <p className="text-gray-400 text-xs">Conv.</p>
-                    <p className="text-green-400">{listing.conv}</p>
-                  </div>
-                  <div>
-                    <span className={`px-2 py-1 rounded-full text-xs border ${
-                      listing.status === 'Active' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
-                      listing.status === 'Featured' ? 'bg-neon-purple/10 border-neon-purple/20 text-neon-purple' :
-                      'bg-red-500/10 border-red-500/20 text-red-400'
-                    }`}>
-                      {listing.status}
-                    </span>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="text-right">
+                      <p className="text-gray-400 text-xs">Price</p>
+                      <p className="font-medium text-white">{listing.price}</p>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                      <p className="text-gray-400 text-xs">Views</p>
+                      <p className="text-gray-300">{listing.views}</p>
+                    </div>
+                    <div className="text-right hidden sm:block">
+                      <p className="text-gray-400 text-xs">Conv.</p>
+                      <p className="text-green-400">{listing.conv}</p>
+                    </div>
+                    <div>
+                      <span className={`px-2 py-1 rounded-full text-xs border ${
+                        listing.status === 'Active' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                        listing.status === 'Featured' ? 'bg-neon-purple/10 border-neon-purple/20 text-neon-purple' :
+                        'bg-red-500/10 border-red-500/20 text-red-400'
+                      }`}>
+                        {listing.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="py-10 text-center text-gray-500 text-sm">
+                No listings match your search.
               </div>
-            ))}
+            )}
           </div>
         </div>
 

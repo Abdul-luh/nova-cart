@@ -1,4 +1,33 @@
+import { useState } from "react";
+
+const allOrders = [
+  { id: "#ORD-9921", buyer: "alex_dev", seller: "pro_tools", product: "AI Prompt Bundle v2", amount: "$49.99", status: "Completed", date: "2 mins ago" },
+  { id: "#ORD-9920", buyer: "sarah_j", seller: "crypto_master", product: "Trading Bot Setup", amount: "$199.00", status: "Pending", date: "15 mins ago" },
+  { id: "#ORD-9919", buyer: "mike_w", seller: "design_hub", product: "UI Kit Premium", amount: "$79.00", status: "Refunded", date: "1 hour ago" },
+  { id: "#ORD-9918", buyer: "emma_s", seller: "dev_accs", product: "AWS Setup Guide", amount: "$29.99", status: "Completed", date: "3 hours ago" },
+  { id: "#ORD-9917", buyer: "josh_t", seller: "seo_ninja", product: "Backlink Package", amount: "$149.00", status: "Disputed", date: "5 hours ago" },
+  { id: "#ORD-9916", buyer: "lena_m", seller: "ai_master", product: "GPT-4 Prompts Pack", amount: "$19.99", status: "Completed", date: "8 hours ago" },
+  { id: "#ORD-9915", buyer: "chris_k", seller: "game_king", product: "Valorant Radiant Account", amount: "$450.00", status: "Pending", date: "12 hours ago" },
+  { id: "#ORD-9914", buyer: "nina_r", seller: "nitro_plug", product: "Discord Nitro 1 Year", amount: "$65.00", status: "Completed", date: "1 day ago" },
+];
+
 export function Orders() {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+
+  const filtered = allOrders.filter((order) => {
+    const q = query.toLowerCase();
+    const matchesQuery =
+      !q ||
+      order.id.toLowerCase().includes(q) ||
+      order.buyer.toLowerCase().includes(q) ||
+      order.seller.toLowerCase().includes(q) ||
+      order.product.toLowerCase().includes(q);
+    const matchesStatus =
+      statusFilter === "All Statuses" || order.status === statusFilter;
+    return matchesQuery && matchesStatus;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
@@ -35,20 +64,27 @@ export function Orders() {
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <div className="relative w-full sm:w-96">
             <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <input type="text" placeholder="Search orders by ID, buyer, or seller..." className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all placeholder:text-gray-500" />
+            <input
+              id="orders-search"
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search orders by ID, buyer, or seller..."
+              className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-cyan/50 focus:ring-1 focus:ring-neon-cyan/50 transition-all placeholder:text-gray-500"
+            />
           </div>
           <div className="flex gap-2">
-            <select className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50">
+            <select
+              id="orders-status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50"
+            >
               <option>All Statuses</option>
               <option>Completed</option>
               <option>Pending</option>
               <option>Refunded</option>
               <option>Disputed</option>
-            </select>
-            <select className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50">
-              <option>Last 30 Days</option>
-              <option>Last 7 Days</option>
-              <option>Today</option>
             </select>
           </div>
         </div>
@@ -66,36 +102,38 @@ export function Orders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {[
-                { id: "#ORD-9921", buyer: "alex_dev", seller: "pro_tools", product: "AI Prompt Bundle v2", amount: "$49.99", status: "Completed", date: "2 mins ago" },
-                { id: "#ORD-9920", buyer: "sarah_j", seller: "crypto_master", product: "Trading Bot Setup", amount: "$199.00", status: "Pending", date: "15 mins ago" },
-                { id: "#ORD-9919", buyer: "mike_w", seller: "design_hub", product: "UI Kit Premium", amount: "$79.00", status: "Refunded", date: "1 hour ago" },
-                { id: "#ORD-9918", buyer: "emma_s", seller: "dev_accs", product: "AWS Setup Guide", amount: "$29.99", status: "Completed", date: "3 hours ago" },
-                { id: "#ORD-9917", buyer: "josh_t", seller: "seo_ninja", product: "Backlink Package", amount: "$149.00", status: "Disputed", date: "5 hours ago" },
-              ].map((order, i) => (
-                <tr key={i} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 font-mono text-neon-cyan">{order.id}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col">
-                      <span className="text-gray-200">{order.buyer}</span>
-                      <span className="text-xs text-gray-500">→ {order.seller}</span>
-                    </div>
+              {filtered.length > 0 ? (
+                filtered.map((order, i) => (
+                  <tr key={i} className="hover:bg-white/5 transition-colors">
+                    <td className="px-4 py-3 font-mono text-neon-cyan">{order.id}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="text-gray-200">{order.buyer}</span>
+                        <span className="text-xs text-gray-500">→ {order.seller}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-300">{order.product}</td>
+                    <td className="px-4 py-3 font-medium">{order.amount}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs border ${
+                        order.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
+                        order.status === 'Pending' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                        order.status === 'Refunded' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
+                        'bg-orange-500/10 border-orange-500/20 text-orange-400'
+                      }`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400">{order.date}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    No orders match your search.
                   </td>
-                  <td className="px-4 py-3 text-gray-300">{order.product}</td>
-                  <td className="px-4 py-3 font-medium">{order.amount}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs border ${
-                      order.status === 'Completed' ? 'bg-green-500/10 border-green-500/20 text-green-400' :
-                      order.status === 'Pending' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
-                      order.status === 'Refunded' ? 'bg-red-500/10 border-red-500/20 text-red-400' :
-                      'bg-orange-500/10 border-orange-500/20 text-orange-400'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400">{order.date}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

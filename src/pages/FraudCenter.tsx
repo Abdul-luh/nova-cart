@@ -1,4 +1,32 @@
+import { useState } from "react";
+
+type RiskLevel = "All" | "Critical" | "High" | "Medium" | "Low";
+
+const allAlerts = [
+  { id: "TX-8829", user: "anon_991", amount: "$4,500.00", risk: "Critical" as const, reason: "Multiple failed CVV attempts" },
+  { id: "TX-8828", user: "johndoe_x", amount: "$12.99", risk: "Medium" as const, reason: "IP location mismatch (Proxy)" },
+  { id: "TX-8827", user: "new_seller_1", amount: "$850.00", risk: "High" as const, reason: "Velocity limit exceeded" },
+  { id: "TX-8826", user: "guest_buyer", amount: "$299.00", risk: "Low" as const, reason: "First time large purchase" },
+  { id: "TX-8825", user: "shadow_trade", amount: "$9,200.00", risk: "Critical" as const, reason: "Account takeover pattern detected" },
+  { id: "TX-8824", user: "flip_king", amount: "$1,100.00", risk: "High" as const, reason: "Chargeback history flagged" },
+  { id: "TX-8823", user: "mary_b", amount: "$49.99", risk: "Low" as const, reason: "Unusual login location" },
+];
+
 export function FraudCenter() {
+  const [query, setQuery] = useState("");
+  const [riskFilter, setRiskFilter] = useState<RiskLevel>("All");
+
+  const filtered = allAlerts.filter((alert) => {
+    const q = query.toLowerCase();
+    const matchesQuery =
+      !q ||
+      alert.id.toLowerCase().includes(q) ||
+      alert.user.toLowerCase().includes(q) ||
+      alert.reason.toLowerCase().includes(q);
+    const matchesRisk = riskFilter === "All" || alert.risk === riskFilter;
+    return matchesQuery && matchesRisk;
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
@@ -27,8 +55,35 @@ export function FraudCenter() {
       </div>
 
       <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-gray-200">Suspicious Activity Feed</h2>
-        
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+          <h2 className="text-lg font-bold text-gray-200">Suspicious Activity Feed</h2>
+          <div className="flex gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <input
+                id="fraud-search"
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by ID, user, or reason..."
+                className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all placeholder:text-gray-500"
+              />
+            </div>
+            <select
+              id="fraud-risk-filter"
+              value={riskFilter}
+              onChange={(e) => setRiskFilter(e.target.value as RiskLevel)}
+              className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-red-500/50"
+            >
+              <option value="All">All Risks</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-gray-400 uppercase bg-black/20">
@@ -42,35 +97,38 @@ export function FraudCenter() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {[
-                { id: "TX-8829", user: "anon_991", amount: "$4,500.00", risk: "Critical", reason: "Multiple failed CVV attempts" },
-                { id: "TX-8828", user: "johndoe_x", amount: "$12.99", risk: "Medium", reason: "IP location mismatch (Proxy)" },
-                { id: "TX-8827", user: "new_seller_1", amount: "$850.00", risk: "High", reason: "Velocity limit exceeded" },
-                { id: "TX-8826", user: "guest_buyer", amount: "$299.00", risk: "Low", reason: "First time large purchase" },
-              ].map((alert, i) => (
-                <tr key={i} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 font-mono text-gray-400">{alert.id}</td>
-                  <td className="px-4 py-3 text-gray-200">{alert.user}</td>
-                  <td className="px-4 py-3 font-medium">{alert.amount}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                      alert.risk === 'Critical' ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' :
-                      alert.risk === 'High' ? 'bg-orange-500/20 border-orange-500/50 text-orange-400' :
-                      alert.risk === 'Medium' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
-                      'bg-white/5 border-white/10 text-gray-400'
-                    }`}>
-                      {alert.risk}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">{alert.reason}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg text-xs transition-colors">Approve</button>
-                      <button className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs transition-colors">Freeze</button>
-                    </div>
+              {filtered.length > 0 ? (
+                filtered.map((alert, i) => (
+                  <tr key={i} className="hover:bg-white/5 transition-colors">
+                    <td className="px-4 py-3 font-mono text-gray-400">{alert.id}</td>
+                    <td className="px-4 py-3 text-gray-200">{alert.user}</td>
+                    <td className="px-4 py-3 font-medium">{alert.amount}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                        alert.risk === 'Critical' ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' :
+                        alert.risk === 'High' ? 'bg-orange-500/20 border-orange-500/50 text-orange-400' :
+                        alert.risk === 'Medium' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' :
+                        'bg-white/5 border-white/10 text-gray-400'
+                      }`}>
+                        {alert.risk}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">{alert.reason}</td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg text-xs transition-colors">Approve</button>
+                        <button className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs transition-colors">Freeze</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                    No alerts match your search.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
