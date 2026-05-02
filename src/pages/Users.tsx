@@ -1,6 +1,83 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
 
 type UserRole = "All Roles" | "Buyer" | "Seller" | "Admin" | "Moderator";
+
+const roleOptions: { label: UserRole; color: string; dot: string }[] = [
+  { label: "All Roles",  color: "text-neon-cyan",   dot: "bg-neon-cyan" },
+  { label: "Buyer",      color: "text-gray-300",     dot: "bg-gray-400" },
+  { label: "Seller",     color: "text-neon-purple",  dot: "bg-neon-purple" },
+  { label: "Admin",      color: "text-red-400",      dot: "bg-red-400" },
+  { label: "Moderator",  color: "text-yellow-400",   dot: "bg-yellow-400" },
+];
+
+function RoleDropdown({
+  value,
+  onChange,
+}: {
+  value: UserRole;
+  onChange: (r: UserRole) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selected = roleOptions.find((r) => r.label === value) ?? roleOptions[0];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        id="users-role-filter"
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm font-medium transition-all
+          ${open
+            ? "bg-white/10 border-neon-cyan/50 shadow-[0_0_12px_rgba(0,242,254,0.15)]"
+            : "bg-black/20 border-white/10 hover:border-white/20 hover:bg-white/5"
+          }`}
+      >
+        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${selected.dot}`} />
+        <span className={selected.color}>{selected.label}</span>
+        <ChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute top-full right-0 mt-2 w-44 bg-[#0f1220]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="p-1.5 flex flex-col gap-0.5">
+            {roleOptions.map((opt) => (
+              <button
+                key={opt.label}
+                onClick={() => { onChange(opt.label); setOpen(false); }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all text-left
+                  ${value === opt.label
+                    ? "bg-white/10 " + opt.color
+                    : "text-gray-400 hover:bg-white/5 hover:text-gray-200"
+                  }`}
+              >
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${opt.dot} ${value === opt.label ? "opacity-100" : "opacity-40"}`} />
+                {opt.label}
+                {value === opt.label && (
+                  <svg className="w-3.5 h-3.5 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 const allUsers = [
   { name: "alex_dev", email: "alex@example.com", role: "Buyer", loc: "US", orders: 12, value: "$450.00", date: "Jan 12, 2026", verified: true },
@@ -51,20 +128,7 @@ export function Users() {
               className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-neon-cyan/50 transition-all placeholder:text-gray-500"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              id="users-role-filter"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value as UserRole)}
-              className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-neon-cyan/50"
-            >
-              <option>All Roles</option>
-              <option>Buyer</option>
-              <option>Seller</option>
-              <option>Admin</option>
-              <option>Moderator</option>
-            </select>
-          </div>
+          <RoleDropdown value={roleFilter} onChange={setRoleFilter} />
         </div>
 
         <div className="overflow-x-auto mt-2">
